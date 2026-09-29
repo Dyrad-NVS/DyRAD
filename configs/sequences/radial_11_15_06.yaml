@@ -1,0 +1,11 @@
+# RADIal sequence 11_15_06: recording RECORD@2020-11-22_11.15.06, 60-frame training window.
+dataset: radial
+seq_dir: data/radial_processed/seq_11_15_06
+rad_tensors_dir: data/radial_processed/seq_11_15_06/rad_tensors
+radar_poses_dir: data/radial_processed/seq_11_15_06/poses_can
+ego_vel_npy: data/radial_processed/seq_11_15_06/ego_vel_can.npy
+seq_name: RECORD@2020-11-22_11.15.06
+frame_start: 913
+frame_end: 973
+track_max_displacement_m: 30300.0  # clamp on each reflector's displacement, dominated by its object's world position P; must exceed |P|
+render_frame_idxs: [0, 238, 475, 713, 951, 1188, 1426]

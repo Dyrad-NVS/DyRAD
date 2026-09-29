@@ -1,0 +1,21 @@
+# RADIal sequence 12_25_47 processed as the coarse sensor configuration
+# (128 of 512 ADC samples per chirp, 128 of 256 chirps: 4x coarser range, 2x coarser
+# Doppler, same azimuth grid and Doppler wrap period). Used for the sensor-configuration
+# transfer experiment (paper Sec. 4.3 / E). Same window, poses and labels as the native sequence.
+dataset: radial
+seq_dir: data/radial_processed/seq_12_25_47_coarse
+rad_tensors_dir: data/radial_processed/seq_12_25_47_coarse/rad_tensors
+radar_poses_dir: data/radial_processed/seq_12_25_47_coarse/poses_can
+ego_vel_npy: data/radial_processed/seq_12_25_47_coarse/ego_vel_can.npy
+seq_name: RECORD@2020-11-22_12.25.47
+frame_start: 279
+frame_end: 339
+track_max_displacement_m: 10300.0  # clamp on each reflector's displacement, dominated by its object's world position P; must exceed |P|
+render_frame_idxs: [0, 80, 161, 241, 321, 402, 482]
+num_range_bins: 128
+num_doppler_bins: 8
+range_crop_first: 4
+range_crop_last: 12
+radar_doppler_max_mps: 0.6738
+doppler_roll_bins: 4
+lin_hi_global: 0.0  # per-sequence hi (robust p99.9 of the train GT); lo stays the native lin_lo_global

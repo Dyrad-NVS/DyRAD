@@ -1,0 +1,3 @@
+# Ablation "w/o Doppler" (paper Sec. 4.4): the Doppler-shape component of L_rec is
+# removed, leaving the loss on the Doppler-averaged RA map only.
+doppler_axis_weight: 0.0

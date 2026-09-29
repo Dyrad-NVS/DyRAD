@@ -1,0 +1,17 @@
+# DyRAD pip dependencies (verified with Python 3.10, PyTorch 2.4.0 + CUDA 11.8), installed by
+# environment.yml. Install steps: see README: Installation.
+numpy==1.26.4
+scipy==1.15.2
+PyYAML==6.0.3
+tqdm==4.67.1
+scikit-image==0.25.2
+lpips==0.1.4
+matplotlib==3.10.8
+pillow==11.3.0
+pandas==2.3.3
+imageio==2.37.2
+imageio-ffmpeg==0.6.0      # videos written by dyrad.evaluation.render_checkpoint
+ninja                      # gsplat CUDA build
+pytest                     # tests/
+cantools==41.3.0           # RADIal preprocessing only: CAN bus decoding for the ego velocity
+opencv-python-headless==4.11.0.86  # RADIal preprocessing only: imported by the RADIal repository's DBReader

@@ -1,0 +1,12 @@
+# Recipe layer for the synthetic benchmark (paper Sec. C.4): an idealized RADIal-format
+# sensor. Layered after recipes/radial.yaml. The synthetic scenes are evaluated only
+# off-path (displaced ground-truth views), so no frames are held out.
+dt:                 0.1
+lin_lo_global:      3156.25   # global linear normalization range, shared by every synthetic scene
+lin_hi_global:      2401330.0
+camera_calib_path:  ""        # no camera; objects are seeded from the label footprints
+psf_az_sidelobes:   false     # analytic azimuth PSF, no measured beamformer table
+test_every:         0         # no on-path holdout: the scenes are evaluated off-path only
+render_val_frames:  false
+render_save_steps:  [2000, 10000]
+init_cloud_voxel_m: 1.0       # static-cloud dedup voxel of the synthetic benchmark (RADIal/Boreas: 0.5 m)

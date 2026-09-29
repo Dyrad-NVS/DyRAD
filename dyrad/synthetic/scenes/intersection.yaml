@@ -1,0 +1,105 @@
+# Synthetic scene spec for dyrad/synthetic/generate_scene.py (format:
+# dyrad/synthetic/scene_spec.py). World frame: +X = ego forward, +Y = left, +Z = up;
+# the ego starts at the origin. `ego` sets the base path (speed m/s, yaw rate deg/s,
+# longitudinal acceleration m/s^2); each `elements` entry is a reflector group
+# (barrier, wall, pole, corner, car) with positions in m, `rcs` a [lo, hi] uniform
+# range, and car `velocity`/`accel` in world m/s and m/s^2. Element order fixes the
+# RNG draws, so reordering elements changes the scene.
+# Doppler values below are boresight radial velocities (receding-positive) and
+# their wrapped bin on the 16-bin, 0.1123 m/s axis (period 1.7968 m/s, DC at bin 0).
+description: >-
+  Ego decelerating into a junction with CROSSING traffic. The hardest dynamics
+  case in the set: a crossing vehicle's radial velocity sweeps through zero as it
+  passes the boresight, so its Doppler signature moves across the axis within a
+  single sequence instead of sitting in one bin. Static support is deliberately
+  sparse and open-cornered (poles and corner reflectors, no continuous barrier).
+
+# Ego enters at 14 m/s and brakes at -1.5 m/s^2, so over a 4 s sequence the speed
+# falls 14 -> ~8 m/s, so the wrapped Doppler bin of static structure drifts during
+# the sequence (a forward model with a single constant ego velocity cannot fit it).
+#
+# Crossing geometry: a vehicle travelling along +-Y has radial velocity
+# dot(v, r_hat) = v_y * y/r, which passes through zero as y -> 0. Both crossers
+# below start well off boresight and cross it inside the window.
+ego:
+  speed_mps: 14.0
+  yaw_rate_deg_s: 0.0
+  accel_mps2: -1.5
+
+elements:
+  # Junction corners: vertical poles, omnidirectional so they stay visible from
+  # any novel view and act as the stable landmarks for off-path scoring.
+  - kind: pole
+    label: corner_pole_near_right
+    x: 38.0
+    y: -9.0
+    rcs: [0.6, 1.0]
+    height_m: 4.5
+
+  - kind: pole
+    label: corner_pole_near_left
+    x: 38.0
+    y: 9.0
+    rcs: [0.6, 1.0]
+    height_m: 4.5
+
+  - kind: pole
+    label: corner_pole_far_right
+    x: 70.0
+    y: -9.0
+    rcs: [0.6, 1.0]
+    height_m: 4.5
+
+  - kind: pole
+    label: corner_pole_far_left
+    x: 70.0
+    y: 9.0
+    rcs: [0.6, 1.0]
+    height_m: 4.5
+
+  # Two bright compact specular returns facing back down the road — the isolated
+  # strong reflectors a junction has (sign gantries, kerb reflectors).
+  - kind: corner
+    label: reflector_right
+    x: 50.0
+    y: -8.0
+    rcs: [4.0, 6.0]
+
+  - kind: corner
+    label: reflector_left
+    x: 50.0
+    y: 8.0
+    rcs: [4.0, 6.0]
+
+  # Approach-side guardrails, ending before the junction mouth so the corners stay
+  # open (that is what distinguishes this from the highway scene).
+  - kind: barrier
+    label: approach_guardrail_right
+    y: -9.0
+    x_start: -5.0
+    x_end: 34.0
+    rcs: [0.6, 0.9]
+
+  - kind: barrier
+    label: approach_guardrail_left
+    y: 9.0
+    x_start: -5.0
+    x_end: 34.0
+    rcs: [0.6, 0.9]
+
+  # Crossing right-to-left: starts at y = -25 and crosses boresight at t ~= 3.1 s.
+  - kind: car
+    label: crosser_rtl
+    x0: 45.0
+    y0: -25.0
+    velocity: [0.0, 8.0, 0.0]
+    rcs: [12.0, 18.0]
+
+  # Crossing left-to-right, further out and slightly decelerating.
+  - kind: car
+    label: crosser_ltr
+    x0: 60.0
+    y0: 20.0
+    velocity: [0.0, -7.0, 0.0]
+    rcs: [12.0, 18.0]
+    accel: [0.0, 0.8, 0.0]

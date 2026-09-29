@@ -1,0 +1,70 @@
+# Synthetic scene spec for dyrad/synthetic/generate_scene.py (format:
+# dyrad/synthetic/scene_spec.py). World frame: +X = ego forward, +Y = left, +Z = up;
+# the ego starts at the origin. `ego` sets the base path (speed m/s, yaw rate deg/s,
+# longitudinal acceleration m/s^2); each `elements` entry is a reflector group
+# (barrier, wall, pole, corner, car) with positions in m, `rcs` a [lo, hi] uniform
+# range, and car `velocity`/`accel` in world m/s and m/s^2. Element order fixes the
+# RNG draws, so reordering elements changes the scene.
+# Doppler values below are boresight radial velocities (receding-positive) and
+# their wrapped bin on the 16-bin, 0.1123 m/s axis (period 1.7968 m/s, DC at bin 0).
+description: >-
+  A constant-radius left-hand curve, with guardrails that follow the road and one
+  oncoming vehicle. The only scene whose ego path is not straight: the sensor
+  heading rotates through the sequence, so the parallax available per frame — and
+  therefore what an off-path lateral shift actually changes — differs from every
+  other scene in the set.
+
+# Ego 20 m/s turning left at 4 deg/s -> turn radius R = v/omega = 20/(4*pi/180)
+# = 286 m, i.e. curvature 1/R = 0.0035 /m. The guardrails carry the same
+# curvature so they stay beside the road instead of drifting across it, as the
+# parabola y(x) = y + x^2/(2R): within 0.6 m of the ego's arc up to x = 100 m,
+# about 3 m off at x = 150 m (seen near the far range in the last frames).
+#
+# Oncoming at -18 m/s world gives v_r = -18 - 20 = -38 m/s (wrapped bin ~13.6); its
+# apparent Doppler bin also drifts as the heading rotates, because the radial
+# component of a fixed world velocity changes with the sensor's orientation.
+ego:
+  speed_mps: 20.0
+  yaw_rate_deg_s: 4.0
+  accel_mps2: 0.0
+
+elements:
+  - kind: barrier
+    label: outer_guardrail
+    y: -10.0
+    x_start: -5.0
+    x_end: auto
+    rcs: [0.6, 0.9]
+    curvature_inv_m: 0.0035
+
+  - kind: barrier
+    label: inner_barrier
+    y: 8.0
+    x_start: -5.0
+    x_end: auto
+    rcs: [0.8, 1.2]
+    curvature_inv_m: 0.0035
+
+  # A few poles on the outside of the curve — on a bend these sweep through
+  # azimuth much faster than on a straight road.
+  - kind: pole
+    label: curve_pole_a
+    x: 35.0
+    y: -12.0
+    rcs: [0.5, 0.9]
+    height_m: 4.0
+
+  - kind: pole
+    label: curve_pole_b
+    x: 58.0
+    y: -10.0
+    rcs: [0.5, 0.9]
+    height_m: 4.0
+
+  # Oncoming vehicle on the far side of the curve.
+  - kind: car
+    label: car_oncoming
+    x0: 80.0
+    y0: 4.5
+    velocity: [-18.0, 0.0, 0.0]
+    rcs: [12.0, 18.0]

@@ -1,0 +1,53 @@
+# Recipe layer for Boreas (Navtech CIR304-H spinning radar, range-azimuth only).
+# Layered after recipes/radial.yaml: only the keys that differ from RADIal, and the Table 3
+# column, are set here.
+# Paper Table 3 hyperparameters: interp_consist_weight, means_lr, opacities_lr, sh_coeffs_lr, deform_lr.
+
+# ── Sensor grid: 3360 range bins x 400 azimuth bins, no Doppler axis (D = 1) ──
+num_range_bins:             3360
+range_crop_first:           0
+range_crop_last:            2521     # keep the first 839 bins (~50 m)
+near_range_blank_bins:      41       # = int(NAVTECH_NEAR_RANGE_BLACKOUT_M / NAVTECH_RANGE_RES_M), dyrad.constants: the near range the preprocessing zeroes
+radar_far_range:            200.256  # 3360 bins x 0.0596 m
+range_bin_offset:           0.5      # Navtech bin centre: bin b at (b + 0.5) * 0.0596 m, as pyboreas reads it
+num_azimuth_bins:           400
+radar_az_fov_deg:           359.1
+num_doppler_bins:           1
+radar_doppler_min_mps:      0.0
+radar_doppler_max_mps:      0.0
+doppler_roll_bins:          0
+dt:                         0.25     # nominal Navtech rotation period
+use_frame_timestamps:       true     # time axis = the scan stamps, at which the Applanix poses are sampled
+
+# ── Sensor PSF (paper A.1, Eq. 4): tapered sinc^2 kernels with fixed widths ──
+# No processing chain is available, so range and azimuth use the parametric kernel;
+# (w_R, k_R) = (5.7, 16) from validation, (w_A, k_A) = (2.26, 4) from the 1.8 deg beam.
+use_physical_dr_psf:        false
+psf_az_sidelobes:           false
+psf_k_D:                    1
+psf_w_D:                    1.0
+psf_max_k_D:                3
+psf_k_R:                    16
+psf_w_R:                    5.7
+psf_max_k_R:                33
+psf_k_A:                    4
+psf_w_A:                    2.26
+psf_max_k_A:                9
+
+# ── Measurement domain: log-compressed counts, Y_hat = log10(Psi + b_s) ─────────
+measurement_domain:         log_power
+lin_lo_global:              0.0      # 0 => per-sequence robust normalization range
+lin_hi_global:              0.0
+sensor_power_scale:         1.0
+cull_outside_range_window:  true
+
+# ── Initialization: static cloud from free space, dynamic seeds from the RA returns ──
+# inside each labelled object's region (paper B.1, as on RADIal); no Doppler slice to select.
+camera_calib_path:          ""       # Boreas boxes are metric; no camera widths
+
+# ── Learning rates (paper Table 3, Boreas column) ──────────────────────────────
+interp_consist_weight:      0.01
+means_lr:                   5.0e-05
+opacities_lr:               0.02
+sh_coeffs_lr:               0.02
+deform_lr:                  0.0005

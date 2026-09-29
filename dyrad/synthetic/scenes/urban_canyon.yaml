@@ -1,0 +1,90 @@
+# Synthetic scene spec for dyrad/synthetic/generate_scene.py (format:
+# dyrad/synthetic/scene_spec.py). World frame: +X = ego forward, +Y = left, +Z = up;
+# the ego starts at the origin. `ego` sets the base path (speed m/s, yaw rate deg/s,
+# longitudinal acceleration m/s^2); each `elements` entry is a reflector group
+# (barrier, wall, pole, corner, car) with positions in m, `rcs` a [lo, hi] uniform
+# range, and car `velocity`/`accel` in world m/s and m/s^2. Element order fixes the
+# RNG draws, so reordering elements changes the scene.
+# Doppler values below are boresight radial velocities (receding-positive) and
+# their wrapped bin on the 16-bin, 0.1123 m/s axis (period 1.7968 m/s, DC at bin 0).
+description: >-
+  Slow urban street between two tall building facades, with parked cars along the
+  right kerb and two slow movers. Stresses DENSE, STRONGLY VIEW-DEPENDENT static
+  structure: the facades are specular and extend above the sensor, so their return
+  changes far more between the driven path and an off-path view than a highway
+  shoulder does.
+
+# Ego at 12 m/s (urban), so static structure sits at v_r = -12 m/s (wrapped bin
+# ~5.1). The two movers have small, opposite relative velocities and wrap to
+# opposite sides of DC:
+#   car_ahead_slow   14 m/s world -> v_rel = +2.0 m/s -> bin ~1.8
+#   car_ahead_slower 10 m/s world -> v_rel = -2.0 m/s -> bin ~14.2
+# Same range regime, opposite Doppler sign, so a model cannot fit both by smearing.
+ego:
+  speed_mps: 12.0
+  yaw_rate_deg_s: 0.0
+  accel_mps2: 0.0
+
+elements:
+  # Building facades. 8 m tall, 1.5 m column spacing, specularity 3 -> bright at
+  # broadside and falling off quickly with view angle.
+  - kind: wall
+    label: left_facade
+    y: 8.0
+    x_start: -5.0
+    x_end: auto
+    rcs: [2.0, 3.0]
+    wall_normal_y: -1.0
+    height_m: 8.0
+    spacing_m: 1.5
+    specularity: 3.0
+
+  - kind: wall
+    label: right_facade
+    y: -8.0
+    x_start: -5.0
+    x_end: auto
+    rcs: [2.0, 3.0]
+    wall_normal_y: 1.0
+    height_m: 8.0
+    spacing_m: 1.5
+    specularity: 3.0
+
+  # Parked cars along the right kerb: cars with zero velocity, so
+  # car_reflectors tags them static. They give the scene mid-height clutter
+  # between the road and the facades.
+  - kind: car
+    label: parked_a
+    x0: 22.0
+    y0: -5.5
+    velocity: [0.0, 0.0, 0.0]
+    rcs: [8.0, 12.0]
+
+  - kind: car
+    label: parked_b
+    x0: 38.0
+    y0: -5.5
+    velocity: [0.0, 0.0, 0.0]
+    rcs: [8.0, 12.0]
+
+  - kind: car
+    label: parked_c
+    x0: 61.0
+    y0: -5.5
+    velocity: [0.0, 0.0, 0.0]
+    rcs: [8.0, 12.0]
+
+  # Movers, both in the driving lane band.
+  - kind: car
+    label: car_ahead_slow
+    x0: 30.0
+    y0: 0.0
+    velocity: [14.0, 0.0, 0.0]
+    rcs: [12.0, 18.0]
+
+  - kind: car
+    label: car_ahead_slower
+    x0: 62.0
+    y0: 3.4
+    velocity: [10.0, 0.0, 0.0]
+    rcs: [12.0, 18.0]

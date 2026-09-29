@@ -1,0 +1,116 @@
+# Synthetic scene spec for dyrad/synthetic/generate_scene.py (format:
+# dyrad/synthetic/scene_spec.py). World frame: +X = ego forward, +Y = left, +Z = up;
+# the ego starts at the origin. `ego` sets the base path (speed m/s, yaw rate deg/s,
+# longitudinal acceleration m/s^2); each `elements` entry is a reflector group
+# (barrier, wall, pole, corner, car) with positions in m, `rcs` a [lo, hi] uniform
+# range, and car `velocity`/`accel` in world m/s and m/s^2. Element order fixes the
+# RNG draws, so reordering elements changes the scene.
+# Doppler values below are boresight radial velocities (receding-positive) and
+# their wrapped bin on the 16-bin, 0.1123 m/s axis (period 1.7968 m/s, DC at bin 0).
+description: >-
+  Divided dual carriageway at 28 m/s: a single continuous median barrier, a run
+  of overhead sign gantries, a vehicle stopped on the hard shoulder, and three
+  SAME-DIRECTION movers (one overtaking, two being caught up). It covers the
+  same-direction traffic case, which the other four scenes do not: urban_canyon
+  has slow movers between building faces, intersection has crossing traffic
+  through zero radial velocity, curve_ramp has one oncoming on a curve, and
+  open_road_sparse has one fast oncoming with almost no static support.
+
+  Its distinctive test is the STOPPED vehicle: a car-shaped, car-bright static
+  return with no annotation (only moving cars are labelled), so shape and
+  brightness alone do not separate dynamic from static structure.
+
+# Ego drives the centre of the rightmost lane at y = 0. Azimuth is atan2(+y, x),
+# matching the CUDA projector and RADIal.
+#
+# Doppler at boresight, ego at 28.0 m/s (v_r = world velocity minus ego):
+#   static structure   v_r = -28.0 m/s   -> bin ~6.7
+#   shoulder_stopped   v_r = -28.0 m/s   -> bin ~6.7 (it is static)
+#   car_overtaking     v_r =  +8.0 m/s   -> bin ~7.2
+#   car_ahead_slow_a   v_r =  -6.0 m/s   -> bin ~10.6
+#   car_ahead_slow_b   v_r =  -7.5 m/s   -> bin ~13.2
+# The two slow movers wrap to different bins from the static return, so the scene
+# cannot be fitted by putting every vehicle near the static bin.
+ego:
+  speed_mps: 28.0
+  yaw_rate_deg_s: 0.0
+  accel_mps2: 0.0
+
+elements:
+  # Left median: continuous concrete barrier. The only
+  # persistent bright line in the scene, and the main static support for the
+  # radar cloud off-path.
+  - kind: barrier
+    label: median_barrier
+    y: 9.0
+    x_start: -5.0
+    x_end: auto
+    rcs: [0.8, 1.2]
+
+  # Overhead sign gantries: strong, widely spaced verticals on the right shoulder.
+  # Unlike a guardrail these are discrete, so the right side of the scene has
+  # bright anchors without a continuous return.
+  - kind: corner
+    label: gantry_1
+    x: 22.0
+    y: -10.5
+    rcs: [3.0, 5.0]
+
+  - kind: corner
+    label: gantry_2
+    x: 58.0
+    y: -10.5
+    rcs: [3.0, 5.0]
+
+  - kind: corner
+    label: gantry_3
+    x: 94.0
+    y: -10.5
+    rcs: [3.0, 5.0]
+
+  # Shoulder posts between the gantries, so the right side is not purely discrete.
+  - kind: pole
+    label: post_r1
+    x: 40.0
+    y: -9.5
+    rcs: [0.5, 0.9]
+    height_m: 4.0
+
+  - kind: pole
+    label: post_r2
+    x: 76.0
+    y: -9.5
+    rcs: [0.5, 0.9]
+    height_m: 4.0
+
+  # Stopped vehicle on the hard shoulder: car-shaped and car-bright but at zero
+  # world velocity, so its Doppler is the static bin.
+  - kind: car
+    label: shoulder_stopped
+    x0: 62.0
+    y0: -7.0
+    velocity: [0.0, 0.0, 0.0]
+    rcs: [12.0, 18.0]
+
+  # Overtaking vehicle in the left lane, passing the ego from behind.
+  - kind: car
+    label: car_overtaking
+    x0: 12.0
+    y0: 3.5
+    velocity: [36.0, 0.0, 0.0]
+    rcs: [12.0, 18.0]
+
+  # Two vehicles ahead in the same direction, slower than ego, being caught up.
+  - kind: car
+    label: car_ahead_slow_a
+    x0: 78.0
+    y0: 0.0
+    velocity: [22.0, 0.0, 0.0]
+    rcs: [12.0, 18.0]
+
+  - kind: car
+    label: car_ahead_slow_b
+    x0: 50.0
+    y0: 3.5
+    velocity: [20.5, 0.0, 0.0]
+    rcs: [10.0, 16.0]

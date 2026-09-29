@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dyrad"
+version = "1.0.0"
+description = "DyRAD: radar novel view synthesis for dynamic driving scenes"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+# torch and torchvision are installed from the CUDA 11.8 wheel index by environment.yml;
+# the radar CUDA kernels are the separate third_party/gsplat/ package.
+dependencies = [
+  "numpy", "scipy", "PyYAML", "tqdm", "scikit-image", "lpips",
+  "matplotlib", "pillow", "pandas", "imageio", "imageio-ffmpeg", "cantools",
+  "opencv-python-headless",  # RADIal preprocessing: the RADIal repository's DBReader imports cv2
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["dyrad*"]
+
+[tool.setuptools.package-data]
+"dyrad.synthetic" = ["scenes/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["cuda: needs a GPU and the built gsplat CUDA extension (skipped otherwise)"]

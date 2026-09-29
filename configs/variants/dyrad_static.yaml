@@ -1,0 +1,5 @@
+# DyRAD-static: every reflector is static; bounding boxes are not used to separate
+# objects at initialization (paper Sec. 4.1). Uses the unpartitioned init cloud.
+static_only:            true
+static_from_free_space: false
+car_psf_margin:         0.0

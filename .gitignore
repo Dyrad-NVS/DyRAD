@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.ruff_cache/
+.pytest_cache/
+build/
+dist/
+*.so
+
+# datasets and outputs (see README: Data); the data dirs may be symlinks
+data/radial_raw
+data/radial_processed
+data/boreas
+data/boreas_processed
+data/synthetic/*/
+results/

@@ -1,0 +1,128 @@
+# DyRAD training recipe for RADIal (77 GHz MIMO radar, 16-bin DDMA Doppler axis).
+# Every run config layers [this recipe, (dataset recipe), sequence stub, variant] (later wins).
+# Boreas and the synthetic benchmark layer recipes/boreas.yaml / recipes/synthetic.yaml after it.
+# Paper Table 3 hyperparameters: interp_consist_weight, means_lr, opacities_lr, sh_coeffs_lr, deform_lr.
+
+# ── Scene initialization (paper Sec. 3.3, B.1) ───────────────────────────────
+# Static reflectors come from a radar pseudo-LiDAR cloud built from the training frames'
+# free space; dynamic reflectors from the Doppler-gated returns inside each annotated
+# object's footprint, aligned to the object frame with the annotation track.
+init_cloud_voxel_m:         0.5      # voxel size of the static cloud (part of its file name)
+dyn_seed_voxel_m:           0.15     # dedup voxel of the aligned dynamic returns, m
+dyn_seed_peak_frac:         0.15     # keep cells above this fraction of the window peak
+track_safety_frames:        4        # bounded linear extrapolation at track ends, frames
+init_alpha:                 0.2      # base reflected power alpha at init
+init_scale:                 0.5      # initial reflector extent, m: read only by the PyTorch rasterizer
+                                     # (learned-extent and learned-PSF ablations), not by the CUDA PSF path
+sh_degree:                  3        # K = 16 SH coefficients for view-dependent reflectivity
+sh_degree_interval:         100      # raise the active SH degree every N steps
+static_only:                false    # DyRAD-static sets true (variants/dyrad_static.yaml)
+allow_missing_rad:          true     # tolerate sequence dirs that hold only the training window
+
+# Annotations: object boxes separate dynamic regions from the static background.
+object_label_path:          data/radial_raw/ready_to_use/labels_CVPR.csv
+label_assoc_threshold_m:    12.0     # greedy box tracker gate, m: max distance to the constant-velocity prediction
+camera_calib_path:          data/radial_processed/RADIal_repo/DBReader/examples/camera_calib.npy
+# RA partition: each frame's free space feeds the static cloud, each object's footprint
+# (dilated by car_psf_margin PSF half-widths) feeds that object's dynamic seeds. The cloud
+# builder records these in a .partition.json sidecar and the trainer refuses a mismatch.
+static_from_free_space:     true
+car_psf_margin:             1.0
+
+# ── Object tracks (paper Sec. 3.1, Fig. 3) ───────────────────────────────────
+# One learned track point per training frame (none at a held-out frame), initialized at
+# the annotation; velocity is the least-squares slope over the 2 x track_vel_fit_span
+# neighbouring points; heading from the direction of travel for objects that travel at
+# least track_rotate_min_travel_m.
+deform_lr:                  0.01     # track-point learning rate (paper Table 3 "Motion LR")
+track_ctrl_interp_every:    1
+use_frame_timestamps:       false    # time = poses_can/frame_slots.npy * 0.2 s, the clock the poses use (see preprocessing/radial/poses.py)
+track_vel_fit_span:         2
+track_rotate_min_travel_m:  5.0
+sh_freeze_dynamic_steps:    2000     # dynamic SH coefficients frozen for the first N steps
+
+# ── Sensor grid and Doppler axis ─────────────────────────────────────────────
+# RADIal RAD tensors are [D=16, R=512, A=751]; the Doppler axis is the DDMA-reduced 16-bin
+# axis at 0.1123 m/s/bin (wrap period 1.7968 m/s) with 0 m/s at bin 8 after rolling.
+num_range_bins:             512
+num_azimuth_bins:           751
+num_doppler_bins:           16
+range_crop_first:           15
+range_crop_last:            50
+radar_far_range:            103.0
+range_bin_offset:           0.0      # FFT convention: range bin b at b * far_range / num_range_bins
+dt:                         0.2
+radar_az_fov_deg:           150.0
+radar_doppler_min_mps:      -0.8984  # -8 * 0.1123 m/s
+radar_doppler_max_mps:       0.7861  # +7 * 0.1123 m/s
+doppler_roll_bins:          8        # GT has DC at bin 0; roll to the DC-at-bin-8 axis
+doppler_wrap_period_mps:    1.7968
+doppler_sign:               -1.0     # RADIal's forward-FFT Doppler sign convention
+
+# ── Sensor PSF (paper Sec. 3.2, A.1) ─────────────────────────────────────────
+# Range and Doppler use the analytic Hamming-FFT response (use_physical_dr_psf) and
+# azimuth the measured beamformer response (psf_az_sidelobes). The psf_w_* widths size the
+# footprint dilation (car_psf_margin), initialize the learned-PSF ablation and set the
+# analytic azimuth kernel where psf_az_sidelobes is false. The PSF is fixed; the
+# learned-PSF ablation sets psf_learned.
+render_mode:                psf
+psf_learned:                false
+psf_in_cuda:                true
+use_physical_dr_psf:        true
+psf_az_sidelobes:           true
+psf_k_D:                    3        # support (bins) of the Doppler PSF
+psf_w_D:                    1.77     # width (bins) of the Doppler PSF
+psf_max_k_D:                5
+psf_k_R:                    4
+psf_w_R:                    1.47
+psf_max_k_R:                9
+psf_k_A:                    36
+psf_w_A:                    21.44
+psf_max_k_A:                73
+psf_strength_init:          1.0
+
+# ── Reflector parameters ─────────────────────────────────────────────────────
+# Point reflectors: scales and orientations are frozen; the SH DC term is frozen, so alpha
+# (the "opacity" logit) is the per-reflector brightness. Learning rates from paper Table 3.
+means_lr:                   0.0002
+opacities_lr:               0.02
+sh_coeffs_lr:               0.01
+scales_lr:                  0.0
+quats_lr:                   0.0
+
+# ── Measurement domain and normalization ─────────────────────────────────────
+# Y_hat = sqrt(Psi) + b_s: RADIal's beamformed amplitude, with the per-sequence noise
+# pedestal b_s. Loss, evaluation and saved renders all use this Y_hat.
+measurement_domain:         amplitude
+noise_floor_median_k:       1.5      # norm.json noise floor nf = k * median(Doppler-mean RA of the train GT)
+norm_clip_ceiling:          1.0      # clip normalized values to [0, 1] (loss, eval, viz)
+lin_hi_pct:                 99.9     # per-sequence robust hi percentile, used where lin_hi_global is 0
+lin_lo_global:              1833.0   # global linear normalization range (RAD cube)
+lin_hi_global:              5.9e+6
+norm_percentile_lo:         1.0      # log-map percentiles of the norm.json log views
+norm_percentile_hi:         99.99    # (display panels, *_N metrics)
+
+# ── Loss (paper Sec. 3.3): L = L_rec + lambda_int L_int ──────────────────────
+# L_rec = mean((Y_hat - Y)^2) over every RAD bin.
+doppler_axis_weight:        1.0      # w_D: 1 = full-RAD L2; 0 = Doppler-averaged RA loss (ablation)
+interp_consist_weight:      0.1      # lambda_int (paper Table 3)
+sigma_static_bins:          1.5      # half-width of the static-Doppler band used by densification
+
+# ── Densification (paper B.3) ────────────────────────────────────────────────
+densify_start_step:         1000
+densify_stop_step:          23000    # > max_steps: densification runs to the end of training
+densify_every:              200
+densify_residual_thresh:    0.05
+densify_max_reflectors:     800000
+densify_max_per_grow:       1000     # strongest residual peaks seeded per event
+densify_dedup_radius_m:     1.0      # skip peaks within this distance of a reflector
+
+# ── Training and holdout ─────────────────────────────────────────────────────
+max_steps:                  10000
+seed:                       1        # seeds python/numpy/torch (deterministic cudnn)
+test_every:                 5        # every 5th frame (global index, offset 0) is held out; 0 = none
+test_offset:                0
+save_steps:                 []       # only ckpt_final.pt is written
+render_save_steps:          [2000, 5000, 10000]
+render_val_frames:          true
+

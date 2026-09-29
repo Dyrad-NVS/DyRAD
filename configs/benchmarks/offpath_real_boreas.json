@@ -1,0 +1,31 @@
+{
+  "dataset": {
+    "id": "boreas",
+    "labels_filename": "labels_boreas.csv"
+  },
+  "views_root": "data/boreas_processed/offpath_real",
+  "n_frames": 50,
+  "lateral_shift_m": 2.0,
+  "init_cloud": {
+    "voxel_m": 0.1,
+    "noise_factor": 35.0
+  },
+  "variants": [
+    "dyrad",
+    "dyrad_static"
+  ],
+  "sequences": [
+    {
+      "id": "sparse2",
+      "frame_start": 0
+    },
+    {
+      "id": "sparse4",
+      "frame_start": 0
+    },
+    {
+      "id": "win55_104",
+      "frame_start": 0
+    }
+  ]
+}

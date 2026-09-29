@@ -1,0 +1,10 @@
+# Ablation "learned PSF" (paper Sec. 4.4): point reflectors with learned PSF bandwidths.
+# The PSF is applied as a post-rasterization convolution so its widths receive gradients.
+# That torch PSF is the sinc^2 x Hann kernel on every axis: the inherited
+# use_physical_dr_psf does not apply to it. Without the CUDA PSF the rasterizer splats
+# each reflector with its Gaussian extent, so init_scale sets the initial extent here.
+psf_learned:      true
+psf_in_cuda:      false
+psf_lr:           0.001
+init_scale:       0.05
+psf_az_sidelobes: false

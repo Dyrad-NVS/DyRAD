@@ -1,0 +1,14 @@
+# Synthetic scene `intersection` (dyrad/synthetic/scenes/intersection.yaml), base trajectory, 40 frames.
+# Trained on the base trajectory; evaluated on the displaced views (lateral -1.75/+1.75/+3.5 m,
+# yaw +5/+10 deg) with python -m dyrad.evaluation.evaluate_offpath_synthetic.
+dataset: synthetic
+seq_dir: data/synthetic/intersection/base
+rad_tensors_dir: data/synthetic/intersection/base/rad_tensors
+radar_poses_dir: data/synthetic/intersection/base/poses_can
+ego_vel_npy: data/synthetic/intersection/base/ego_vel_can.npy
+seq_name: base
+object_label_path: data/synthetic/intersection/base/labels_CVPR.csv
+frame_start: 0
+frame_end: 40
+track_max_displacement_m: 6000.0
+render_frame_idxs: [0, 13, 26, 39]

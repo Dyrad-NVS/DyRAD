@@ -1,0 +1,28 @@
+# Sequence stub: Boreas (boreas-objects-v1), 50-frame low-traffic window.
+# Navtech 360-degree scanning radar, range-azimuth only (D=1), annotated.
+# Timestamps 1598991981484792-1598991993733497 (50 frames @ 4 Hz, 12.25 s).
+# Lowest-traffic window of the recording that still has substantial ego motion
+# (94 m of travel, 7.7 m/s): 2.3 moving cars/frame, 3 dynamic tracks.
+# Few moving objects, so per-object statistics on this window are noisy.
+#
+# Preprocessing: python -m dyrad.preprocessing.boreas prepare-window --window sparse2
+# Navtech intensities are log-compressed counts: power = 10^(u/20).
+#
+# Poses are recentred on the mean translation of the window (see
+# <seq_dir>/recentre.json) so that world coordinates fit float32 precision;
+# raw UTM northings (~4.8e6 m) do not.
+# The clamp track_max_displacement_m bounds each object reflector's displacement
+# dx = R(t) mu + P(t) - mu, which is dominated by the object's world position P(t),
+# so it must exceed the objects' world-coordinate extent (|x|, |y| < 84 m here).
+dataset: boreas
+seq_dir: data/boreas_processed/boreas_obj_sparse2_rc
+rad_tensors_dir: data/boreas_processed/boreas_obj_sparse2_rc/rad_tensors
+radar_poses_dir: data/boreas_processed/boreas_obj_sparse2_rc/poses_can
+ego_vel_npy: data/boreas_processed/boreas_obj_sparse2_rc/ego_vel.npy
+seq_name: BOREAS-OBJ-SPARSE2
+object_label_path: data/boreas_processed/boreas_obj_sparse2_rc/labels_boreas.csv
+frame_start: 0
+frame_end: 50
+track_max_displacement_m: 300.0
+render_frame_idxs: [0, 25, 49]
+render_save_steps: [0, 2000, 10000]

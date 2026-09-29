@@ -1,0 +1,2 @@
+# Ablation "w/o L_int" (paper Sec. 4.4): no interpolation-consistency term.
+interp_consist_weight: 0.0

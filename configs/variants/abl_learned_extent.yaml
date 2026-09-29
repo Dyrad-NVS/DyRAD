@@ -1,0 +1,10 @@
+# Ablation "learned extent" (paper Sec. 4.4): Gaussian primitives with learned spatial
+# extent instead of point reflectors rendered through the fixed PSF.
+render_mode:           learned_extent
+train_scales:          true
+train_quats:           true
+scales_lr:             0.005
+quats_lr:              0.001
+scales_clamp_max_m:    3.0
+densify_max_reflectors: 300000
+psf_az_sidelobes:      false
