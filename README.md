@@ -323,15 +323,6 @@ The Boreas on-path columns (Tables 1, 5) are not in `metrics_extended*.json` but
 `rho_N_obj`, `psnr_N_obj`, `ssim_N_obj`. Their object region (a window around each label) differs
 from the off-path one, so do not read Table 1's Boreas object columns from `ra_*_N_obj`.
 
-Not shipped: the hyperparameter search behind Table 3 (only the selected values, in the recipes),
-the structureless CONST / ZERO controls of Table 4, the render-latency column of Table 11
-(`train_meta.json` holds the training time and memory), the per-sequence init-cloud thresholds of
-the paper's RADIal clouds (`prepare` bisects the threshold to a target point density), and the
-RadarSplat / RadarFields training code with the wrap-aware static ego-Doppler lift that turns their
-RA predictions into the RAD cubes scored in the baseline rows. Their renders are scored with
-`score_renders` as described under Evaluation (and on Boreas on-path with `score_boreas
---radarsplat / --radarfields`).
-
 ## Tests
 
 ```bash
