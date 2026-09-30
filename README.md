@@ -1,5 +1,7 @@
 # DyRAD: Radar Novel View Synthesis for Dynamic Driving Scenes
 
+<p align="center"><img src="assets/teaser.png" alt="DyRAD re-simulation: from a measured radar frame, DyRAD renders a laterally shifted sensor, a repositioned object and a higher-resolution sensor, and scores higher RAD PSNR and detection hit rate than RadarSplat and RadarFields." width="100%"></p>
+
 Code and configurations for the paper *DyRAD: Radar Novel View Synthesis for Dynamic Driving
 Scenes*. DyRAD reconstructs a dynamic driving scene from recorded range–azimuth–Doppler (RAD)
 radar tensors, sensor poses and object boxes, and renders RAD tensors at new sensor poses:
@@ -53,6 +55,7 @@ configs/
   benchmarks/                off-path benchmark definitions, synthetic normalization ranges
 third_party/gsplat/          trimmed gsplat fork holding the radar CUDA kernels (Apache-2.0)
 tests/                       pytest tests (CPU, plus one GPU test of the CUDA PSF kernel)
+assets/                      the README teaser figure (paper Fig. 1)
 ```
 
 Method variants (`configs/variants/`), named as in the paper:
