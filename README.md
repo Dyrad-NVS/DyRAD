@@ -2,6 +2,8 @@
 
 <p align="center"><img src="assets/teaser.png" alt="DyRAD re-simulation: from a measured radar frame, DyRAD renders a laterally shifted sensor, a repositioned object and a higher-resolution sensor, and scores higher RAD PSNR and detection hit rate than RadarSplat and RadarFields." width="100%"></p>
 
+<p align="center"><a href="https://arxiv.org/abs/2609.39841">Paper (arXiv)</a> · <a href="https://dyrad-nvs.github.io">Project page</a></p>
+
 Code and configurations for the paper *DyRAD: Radar Novel View Synthesis for Dynamic Driving
 Scenes*. DyRAD reconstructs a dynamic driving scene from recorded range–azimuth–Doppler (RAD)
 radar tensors, sensor poses and object boxes, and renders RAD tensors at new sensor poses:
@@ -334,6 +336,20 @@ pytest
 
 The tests run on CPU; the one marked `cuda` renders a reflector through the CUDA PSF kernel and
 is skipped without a GPU and the built extension.
+
+## Citation
+
+```bibtex
+@article{keidar2026dyrad,
+  title         = {DyRAD: Radar Novel View Synthesis for Dynamic Driving Scenes},
+  author        = {Keidar, Merav and Borreda, Tomer and Nandakumar, Rajalakshmi and Litany, Or},
+  journal       = {arXiv preprint arXiv:2609.39841},
+  year          = {2026},
+  eprint        = {2609.39841},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2609.39841}
+}
+```
 
 ## License
 
