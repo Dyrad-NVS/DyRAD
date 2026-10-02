@@ -1,0 +1,3 @@
+# GitHub language stats: count the gsplat fork (radar CUDA kernels), not the bundled glm
+third_party/gsplat/** -linguist-vendored
+third_party/gsplat/gsplat/cuda/csrc/third_party/** linguist-vendored
