@@ -22,6 +22,7 @@ import argparse
 import json
 import subprocess
 import sys
+from pathlib import Path
 
 import numpy as np
 
@@ -105,8 +106,9 @@ def main():
     for scene in a.scenes:
         print(f"[synthetic] {scene}")
         parent = ROOT / "data/synthetic" / scene
-        cfg = ROOT / f"configs/synthetic/{scene}_dyrad.yaml"
-        cfg_static = ROOT / f"configs/synthetic/{scene}_dyrad_static.yaml"
+        # Repo-relative (run() works in ROOT), so the sidecars record portable config paths.
+        cfg = Path(f"configs/synthetic/{scene}_dyrad.yaml")
+        cfg_static = Path(f"configs/synthetic/{scene}_dyrad_static.yaml")
         n_tensors = [len(list((parent / t / "rad_tensors").glob("rad_*.npy"))) for t in view_tags()]
         generate = n_tensors != [NUM_FRAMES] * len(n_tensors)
         if not generate:
@@ -157,7 +159,7 @@ def main():
                 "--noise-factor",
                 nf,
                 "--voxel",
-                load_yaml_config(cfg)["init_cloud_voxel_m"],
+                load_yaml_config(ROOT / cfg)["init_cloud_voxel_m"],
                 "--partition",
             ]
         )
@@ -171,10 +173,10 @@ def main():
                 "--noise-factor",
                 nf,
                 "--voxel",
-                load_yaml_config(cfg_static)["init_cloud_voxel_m"],
+                load_yaml_config(ROOT / cfg_static)["init_cloud_voxel_m"],
             ]
         )
-        ranges, crop = measure_norm_ranges(cfg)
+        ranges, crop = measure_norm_ranges(ROOT / cfg)
         write_norm_ranges(scene, ranges, crop)
         print(
             "  norm ranges: "

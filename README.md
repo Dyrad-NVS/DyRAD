@@ -2,7 +2,7 @@
 
 <p align="center"><img src="assets/teaser.png" alt="DyRAD re-simulation: from a measured radar frame, DyRAD renders a laterally shifted sensor, a repositioned object and a higher-resolution sensor, and scores higher RAD PSNR and detection hit rate than RadarSplat and RadarFields." width="100%"></p>
 
-<p align="center"><a href="https://arxiv.org/abs/2609.39841">Paper (arXiv)</a> · <a href="https://dyrad-nvs.github.io">Project page</a></p>
+<p align="center"><a href="https://arxiv.org/abs/2609.39841">Paper (arXiv)</a> · <a href="https://dyrad-nvs.github.io">Project page</a> · <a href="https://huggingface.co/datasets/DyRAD/dyrad-synthetic">Synthetic benchmark (Hugging Face)</a></p>
 
 Code and configurations for the paper *DyRAD: Radar Novel View Synthesis for Dynamic Driving
 Scenes*. DyRAD reconstructs a dynamic driving scene from recorded range–azimuth–Doppler (RAD)
@@ -177,6 +177,15 @@ normalization ranges for the scorer and writes them into the tracked file
 `configs/benchmarks/synthetic_norm_ranges.json`. It reuses a scene's existing views and its
 `norm.json` (and says so); delete `data/synthetic/<scene>/` to regenerate after changing a scene
 or the generator.
+
+The generated benchmark is also on the Hugging Face Hub
+([DyRAD/dyrad-synthetic](https://huggingface.co/datasets/DyRAD/dyrad-synthetic)), byte-identical to
+the output of `prepare`. To download it instead of generating it (`prepare` then reuses the views):
+
+```bash
+hf download DyRAD/dyrad-synthetic --repo-type dataset --exclude "frames/*" "rad/*" \
+    --local-dir data/synthetic
+```
 
 ## Training
 
