@@ -183,7 +183,7 @@ The generated benchmark is also on the Hugging Face Hub
 the output of `prepare`. To download it instead of generating it (`prepare` then reuses the views):
 
 ```bash
-hf download DyRAD/dyrad-synthetic --repo-type dataset --exclude "frames/*" "rad/*" \
+hf download DyRAD/dyrad-synthetic --repo-type dataset --exclude "frames/*" --exclude "rad/*" \
     --local-dir data/synthetic
 ```
 
